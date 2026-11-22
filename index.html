@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Przewodnik przyszłego rodzica</title>
+<title>Wniosek Na Start</title>
 <link rel="icon" type="image/png" href="assets/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,14 +12,14 @@
 </head>
 <body>
 <header class="top">
-<img class="logo" id="hlogo" alt="">
-<div><h1>Przewodnik przyszłego rodzica</h1><p>Prototyp: logowanie mObywatel i dane ZUS są symulowane, osoby testowe są zmyślone.</p></div>
+<div><h1 class="brand"><img class="brandlogo" src="assets/logowanie.png" alt="Wniosek na Start" width="800" height="304"></h1><p>Prototyp: logowanie mObywatel i dane ZUS są symulowane, osoby testowe są zmyślone.</p></div>
 <div class="sp"></div>
 <div id="who"></div>
 </header>
 <nav class="nav" id="nav" aria-label="Menu"></nav>
 <div id="app" style="flex:1;display:flex;flex-direction:column;min-height:0"></div>
 <!-- Skrypty ładowane po kolei (zwykłe <script>, nie moduły, żeby działało po otwarciu pliku z dysku). Kolejność ma znaczenie. -->
+<script src="js/config.js"></script>
 <script src="js/01-narzedzia.js"></script>
 <script src="js/02-profile.js"></script>
 <script src="js/03-formularz.js"></script>

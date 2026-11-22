@@ -21,14 +21,14 @@ function renderSprawa(){
 const r=S.caseRes;
 $('#app').innerHTML=page('Sprawa z PDF',`<p class="lead">Wgraj skan wniosku lub akt sprawy (PDF albo zdjęcie). Asystent odczyta dane, sprawdzi ubezpieczenie i policzy zasiłek z indywidualnej podstawy. Dane możesz potem przenieść do formularza.</p>
 <div class="cols"><div><label class="drop" for="cf"><input type="file" id="cf" accept="application/pdf,image/jpeg,image/png,image/webp"><strong>Wybierz plik</strong><span class="note">PDF, JPG lub PNG. Pliki ze zbioru konkursowego służą tylko do testów w ramach HackNation.</span></label><div class="row" style="margin-top:10px"><button class="btn y" id="can" disabled>Analizuj</button><button class="btn" id="cstop" hidden>Stop</button></div><p class="note" id="cst"></p><div class="thumbs" id="cth"></div></div>
-<aside class="zcard"><h3>Jak to działa</h3><ul class="facts"><li>Strony PDF są zamieniane na obrazy w Twojej przeglądarce.</li><li>Model AI (OpenRouter albo Claude na claude.ai) odczytuje z nich dane. Wybierz model obsługujący obrazy.</li><li>Uprawnienia i kwoty liczy silnik reguł aplikacji.</li></ul></aside></div>
+<aside class="zcard"><h3>Jak to działa</h3><ul class="facts"><li>Strony PDF są zamieniane na obrazy w Twojej przeglądarce.</li><li>Odczyt wymaga trybu z obsługą obrazów.</li><li>Uprawnienia i kwoty liczy silnik reguł aplikacji.</li></ul></aside></div>
 <div id="cres">${r?caseResHTML(r):''}</div>`);
 let file=null;
 $('#cf').onchange=e=>{file=e.target.files[0]||null;$('#can').disabled=!file;$('#cst').textContent=file?file.name:''};
 $('#can').onclick=async()=>{if(!file)return;const st=t=>{const el=$('#cst');if(el)el.textContent=t};
- if(!LLM){st('Odczyt dokumentów wymaga modelu AI: wpisz klucz OpenRouter w zakładce „Asystent AI” (Ustawienia AI).');return}
+ if(!LLM){st('Odczyt dokumentów wymaga podłączonego modelu AI, który nie jest teraz dostępny.');return}
  let lim=null;try{lim=await LLM.limits()}catch(e){}
- if(!lim||!lim.images){st('W tym widoku nie można wysyłać obrazów do Claude.');return}
+ if(!lim||!lim.images){st('Gemini jest podłączone do rozmowy i formularza. Odczyt skanów jest w tym trybie wyłączony.');return}
  const max=Math.min(lim.images.maxCount||5,10);
  $('#can').disabled=true;const ctl=new AbortController();$('#cstop').hidden=false;$('#cstop').onclick=()=>ctl.abort();
  try{let imgs,total=1;

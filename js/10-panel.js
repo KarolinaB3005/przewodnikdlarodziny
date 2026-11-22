@@ -57,9 +57,7 @@ const c=ctx(),z=c.z,d=c.p.dane;
 const zr=c.p.manual?[]:[['Imię i nazwisko',d.imie+' '+d.nazwisko],['PESEL',d.pesel],['Adres',d.adres],['Tytuł ubezpieczenia',FORMA[z.forma]],['Płatnik',z.platnik],['Płatnik > 20 ubezpieczonych',z.ponad20?'tak':'nie'],['Ubezpieczenie od',fmt(z.od)],['Umowa do',z.koniec?fmt(z.koniec):'bezterminowo'],['Dobrowolne chorobowe',z.forma==='uop'?'nie dotyczy':(z.dobr?'tak':'nie')],['Podstawa / wynagrodzenie brutto',z.brutto?new Intl.NumberFormat('pl-PL').format(z.brutto)+' zł':'—'],['Zadłużenie w składkach (dziś)',(()=>{const s=debtOn(c,TODAY);return s&&s.razem?zlTxt(s.razem):'brak'})()],['Rachunek',d.konto]];
 const ans=seq().filter(x=>!x.cur);
 return `<h3 class="h" style="margin-top:0">Z ZUS (symulacja)</h3>${zr.length?`<table class="stack"><tbody>${zr.map(r=>`<tr><td data-l="Pole">${esc(r[0])}</td><td data-l="Wartość">${esc(r[1])}</td></tr>`).join('')}</tbody></table>`:'<div class="empty">Brak danych z ZUS dla tego konta.</div>'}
-<h3 class="h">Z rozmowy</h3>${ans.length?`<table class="stack"><thead><tr><th>Pytanie</th><th>Odpowiedź</th><th>Przyda się do</th><th></th></tr></thead><tbody>${ans.map(x=>`<tr><td data-l="Pytanie">${esc(x.q.id)}</td><td data-l="Odpowiedź">${esc(label(x.q,x.a))}</td><td data-l="Przyda się do">${esc(USE[x.q.base||x.q.id]||'—')}</td><td data-l=""><button class="btn sm" data-ed2="${x.q.id}">Zmień</button></td></tr>`).join('')}</tbody></table>`:'<div class="empty">Jeszcze nic.</div>'}
-<h3 class="h">Profil jako JSON</h3><p class="note">Ten obiekt zasila silnik reguł i formularze.</p><button class="btn sm" id="cp">Kopiuj JSON</button> <span class="note" id="cpm"></span>
-<pre style="background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:13px;overflow-x:auto">${esc(JSON.stringify({zus:c.p.manual?null:{...z,...d},odpowiedzi:S.A},null,2))}</pre>`;
+<h3 class="h">Z rozmowy</h3>${ans.length?`<table class="stack"><thead><tr><th>Pytanie</th><th>Odpowiedź</th><th>Przyda się do</th><th></th></tr></thead><tbody>${ans.map(x=>`<tr><td data-l="Pytanie">${esc(x.q.id)}</td><td data-l="Odpowiedź">${esc(label(x.q,x.a))}</td><td data-l="Przyda się do">${esc(USE[x.q.base||x.q.id]||'—')}</td><td data-l=""><button class="btn sm" data-ed2="${x.q.id}">Zmień</button></td></tr>`).join('')}</tbody></table>`:'<div class="empty">Jeszcze nic.</div>'}`;
 }
 function panelReguly(R){
 const ids=[...R.fired].sort();
@@ -82,5 +80,4 @@ bindZadl(R);
 document.querySelectorAll('[data-w815]').forEach(b=>b.onclick=()=>{S.A.w815=b.dataset.w815;S.order=S.order.filter(x=>x!=='w815');S.order.push('w815');delete S.raw.w815;renderWork(true)});
 bindDl();
 bindGoto();
-if($('#cp'))$('#cp').onclick=()=>{try{navigator.clipboard.writeText(JSON.stringify({odpowiedzi:S.A},null,2)).then(()=>$('#cpm').textContent='Skopiowano.',()=>$('#cpm').textContent='Przeglądarka nie pozwoliła skopiować; zaznacz tekst poniżej.')}catch(e){$('#cpm').textContent='Zaznacz tekst poniżej.'}};
 }
