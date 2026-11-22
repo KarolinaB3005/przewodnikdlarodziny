@@ -30,6 +30,10 @@ Aplikacja prowadzi przyszłego rodzica przez krótką rozmowę i na jej podstawi
 - **Aspekty graficzne**: AI było wykorzystane przy tworzeniu warstwy graficznej aplikacji (wygląd interfejsu i elementy graficzne).
 
 ## Uruchomienie
+## Jeśli osobą oceniającą ten projekt to 
+##  TU JEST LINK 
+## https://wnioseknastart.onrender.com
+# JEST ON RÓWNIEŻ U GÓRY
 
 ### Wymagania
 
