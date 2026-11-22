@@ -66,25 +66,13 @@ OLLAMA_MODEL=inny-model PORT=4000 npm run bielik
 
 Serwer przed startem sprawdza, czy Ollama działa (`http://127.0.0.1:11434`) i czy model jest pobrany. Jeśli nie, wypisze, co zrobić.
 
-### Wariant 2: lokalnie z Gemini API
+### Wariant 2: bez AI
 
-1. Skopiuj `.env.example` jako `.env` i wpisz klucz z [aistudio.google.com](https://aistudio.google.com):
-   ```
-   GEMINI_API_KEY=twój_klucz
-   GEMINI_MODEL=gemini-3.1-flash-lite
-   ```
-2. Uruchom: `npm start`
-3. Otwórz [http://localhost:3000](http://localhost:3000)
-
-Klucz zostaje na serwerze lokalnym i nie trafia do przeglądarki ani do repozytorium (`.env` jest w `.gitignore`).
+Skopiuj `js/config.example.js` jako `js/config.js` i otwórz `index.html` w przeglądarce. Działa wszystko poza asystentem AI: rozmowa korzysta z lokalnego parsera, a asystent z uproszczonych odpowiedzi.
 
 ### Demo online (Render)
 
-Wersja z Gemini API działa też jako usługa na [render.com](https://render.com) (Web Service, Node): Build Command `npm install`, Start Command `npm start`, zmienne środowiskowe `GEMINI_API_KEY` i `GEMINI_MODEL`. Serwer sam rozpoznaje Render (słucha na porcie z `PORT` i przyjmuje adres usługi z `RENDER_EXTERNAL_HOSTNAME`). Bielik działa tylko lokalnie, bo wymaga Ollama.
-
-### Wariant 3: bez AI
-
-Skopiuj `js/config.example.js` jako `js/config.js` i otwórz `index.html` w przeglądarce. Działa wszystko poza asystentem AI: rozmowa korzysta z lokalnego parsera, a asystent z uproszczonych odpowiedzi.
+Demo dla jury działa jako usługa na [render.com](https://render.com) (Web Service, Node): Build Command `npm install`, Start Command `npm start`, zmienne środowiskowe `GEMINI_API_KEY` i `GEMINI_MODEL` (asystent online korzysta z Gemini API). Serwer sam rozpoznaje Render: słucha na porcie z `PORT` i przyjmuje adres usługi z `RENDER_EXTERNAL_HOSTNAME`. Bielik działa tylko lokalnie, bo wymaga Ollama.
 
 ## Struktura projektu
 
