@@ -12,9 +12,11 @@ const aktyHTML=()=>`<ul class="list">${S.akty.map(a=>`<li><strong>${esc(a.nr)}</
 /* dzieci, których akt urodzenia jest w Rejestrze Stanu Cywilnego (dane profilu, bez potrzeby wypełniania formularza) */
 const rscKids=p=>(p&&p.rsc&&p.rsc.dzieci)||[];
 const rscName=k=>k.imie+' '+k.nazwisko;
+/* profil bez danych RSC: dziecko zgłoszone w rozmowie (etap „po”, data porodu) też można wybrać do odpisu */
+const talkKids=c=>parent(c)&&c.A.etap==='po'&&c.birth&&!c.spec?c.kids.map(k=>({imie:k.imie||(c.n>1?'Dziecko '+k.i:'Dziecko'),nazwisko:c.p.dane.nazwisko||'',ur:c.birth,miejsce:((c.p.dane.adres||'').split(' ').pop()||''),usc:'USC właściwy dla miejsca urodzenia',zarej:null,rozmowa:true})):[];
 const ZGLOS_URL='https://www.gov.pl/web/gov/zglos-urodzenie-dziecka';
 function renderAkt(){
- const c=ctx(),kids=rscKids(c.p),rel=c.p.rsc&&c.p.rsc.rel;
+ const c=ctx(),kids=rscKids(c.p).length?rscKids(c.p):talkKids(c),rel=c.p.rsc?c.p.rsc.rel:({mama:'matka',tata:'ojciec'})[c.typ];
  let h=`<p class="note">Rekonstrukcja e-usługi „Uzyskaj odpis aktu stanu cywilnego” z Rejestru Stanu Cywilnego. Prawdziwa usługa: <a href="https://www.gov.pl/web/gov/uzyskaj-odpis-aktu-stanu-cywilnego-urodzenia-malzenstwa-zgonu" target="_blank" rel="noopener">gov.pl: uzyskaj odpis aktu stanu cywilnego</a> (logowanie profilem zaufanym lub e-dowodem). O odpis może wystąpić m.in. rodzic dziecka.</p>`;
  if(!kids.length){
   h+=c.typ==='zast'
@@ -30,7 +32,7 @@ function renderAkt(){
  }else{
   h+=`<form id="akf" class="ezf"><div class="cols"><div>
 <fieldset><legend>Wnioskodawca</legend><p style="margin:4px 0">${esc(nm(c.p))}${rel?', '+esc(rel)+' '+(kids.length>1?'dzieci':'dziecka'):''}</p></fieldset>
-<fieldset><legend>Akt urodzenia (z Rejestru Stanu Cywilnego)</legend>${kids.map((k,i)=>`<label class="chk"><input type="checkbox" data-akk="${i}" checked> <span><strong>${esc(rscName(k))}</strong>, ur. ${fmt(k.ur)}, ${esc(k.miejsce)}<br><span class="note">akt sporządzony ${fmt(k.zarej)}, ${esc(k.usc)}</span></span></label>`).join('')}
+<fieldset><legend>Akt urodzenia (${kids[0].rozmowa?'dziecko z rozmowy':'z Rejestru Stanu Cywilnego'})</legend>${kids.map((k,i)=>`<label class="chk"><input type="checkbox" data-akk="${i}" checked> <span><strong>${esc(rscName(k).trim())}</strong>, ur. ${fmt(k.ur)}${k.miejsce?', '+esc(k.miejsce):''}<br><span class="note">${k.rozmowa?'dane z rozmowy; akt powstaje po zgłoszeniu urodzenia w USC (do 21 dni od wystawienia karty urodzenia)':`akt sporządzony ${fmt(k.zarej)}, ${esc(k.usc)}`}</span></span></label>`).join('')}
 ${kids.some(k=>k.adop)?`<label class="chk" style="margin-top:10px"><input type="checkbox" id="akprawo"> Postanowienie sądu o przysposobieniu jest już prawomocne</label><p class="note" style="margin:4px 0 0 26px">Dopiero wtedy w akcie urodzenia są dane rodziców adopcyjnych i możesz zamówić odpis jako rodzic. Szczegóły potwierdzisz w USC.</p>`:''}</fieldset>
 <fieldset><legend>Rodzaj odpisu</legend>${Object.entries(AKT_RODZ).map(([k,v],i)=>`<label class="chk"><input type="radio" name="akr" value="${k}"${i===0?' checked':''}> <strong>${v[0]}</strong> <span class="note">(${AKT_OPLATA[k]} zł)</span></label><p class="note" style="margin:0 0 8px 26px">${esc(v[1])}</p>`).join('')}</fieldset>
 </div><div>

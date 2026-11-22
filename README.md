@@ -1,102 +1,124 @@
-# Przewodnik przyszłego rodzica
+# Wniosek na Start
 
 Prototyp aplikacji webowej na zadanie konkursowe **„Zasiłkowy Przewodnik Przyszłego Rodzica”** (HackNation 2026, partner: ZUS).
 
-Aplikacja prowadzi przyszłego rodzica przez krótką rozmowę i na jej podstawie:
-- ustala, jaki wniosek trzeba złożyć, do kogo i kiedy,
-- liczy okres i orientacyjną wysokość zasiłków (chorobowy w ciąży, macierzyński, uzupełniający, rodzicielski, ojcowski, na warunkach urlopu macierzyńskiego),
-- ostrzega przed ryzykami utraty prawa do zasiłku,
-- wypełnia wniosek i zapamiętuje dane potrzebne w kolejnych wnioskach,
-- pokazuje oś czasu z terminami i organizacje wsparcia w sytuacjach szczególnych.
+Aplikacja prowadzi przyszłego rodzica przez krótką rozmowę i na jej podstawie mówi, jaki wniosek złożyć, do kogo i kiedy, liczy zasiłki, wypełnia wniosek i ostrzega przed ryzykami utraty prawa do świadczeń.
 
 > Prototyp konkursowy, nie jest serwisem ZUS. Logowanie mObywatel i dane ZUS są symulowane, profile testowe są zmyślone, a wyliczenia orientacyjne.
 
+## Funkcje aplikacji
+
+- **Wybór profilu i symulowane logowanie**: 10 profili testowych z różnymi sytuacjami (umowa o pracę, zlecenie, działalność, tata, adopcja, bliźnięta, brak ubezpieczenia, profil bez danych z ZUS).
+- **Formularz w formie rozmowy**: odpowiedzi przyciskami albo własnymi słowami (parser rozumie m.in. „za 6 tygodni”, „30 listopada”, „jestem w 30 tygodniu”).
+- **Wniosek wypełniany na żywo**: dane z ZUS i z rozmowy trafiają od razu do właściwego wniosku (wniosek o urlop do pracodawcy albo ZUS ZAM).
+- **Kalkulator zasiłków**: okres i orientacyjna kwota zasiłku chorobowego w ciąży, macierzyńskiego, uzupełniającego, rodzicielskiego, ojcowskiego oraz na warunkach urlopu macierzyńskiego; porównanie wariantu 81,5% z 100% + 70%.
+- **Ryzyka i ostrzeżenia**: brak ubezpieczenia w dniu porodu, karencja, umowa kończąca się przed porodem, wzrost podstawy w ciąży, zadłużenie w składkach przy działalności.
+- **Silnik reguł (R01–R37)**: o uprawnieniach decyduje kod, nie model językowy. Zakładka „Reguły” pokazuje użyte reguły i pozwala zmieniać parametry kalkulatora (panel administratora, demo).
+- **Pobieranie wniosku**: Word (.docx) albo strona do druku (.html, można zapisać jako PDF).
+- **Oś czasu i kalendarz**: terminy kolejnych wniosków i urlopów.
+- **eZUS i e-ZLA (symulacja)**: zwolnienia lekarskie, konto, wiadomości do ZUS.
+- **Zadłużenie w składkach**: stan na dzień powstania prawa do zasiłku, spłata, zaświadczenie.
+- **Odpis aktu urodzenia (symulacja usługi gov.pl)**: zamówienie odpisu i śledzenie statusu.
+- **Moje wnioski, Dokumenty, Pomoc**: lista złożonych wniosków, potrzebne załączniki, linki do gov.pl i organizacji wsparcia.
+- **Sytuacje szczególne**: martwe urodzenie, śmierć dziecka, poronienie; aplikacja pokazuje tylko to, co ważne w tej chwili.
+- **Asystent AI**: rozmowa o sytuacji użytkownika (szczegóły niżej).
+- **Sprawa z PDF**: widok do wczytania akt sprawy (odczyt skanów wymaga modelu obsługującego obrazy; w trybie lokalnym z Bielikiem i Gemini jest wyłączony).
+
+## Wykorzystanie AI
+
+- **Asystent w aplikacji**: asystent AI rozmawia z użytkownikiem o jego sytuacji i korzysta z narzędzi aplikacji (odczyt sprawy, symulacja wariantu, zmiana odpowiedzi tylko na prośbę, lista pytań, parametry, organizacje wsparcia). Model pomaga też zrozumieć odpowiedzi, z którymi nie radzi sobie lokalny parser. Asystent może działać lokalnie na modelu **Bielik** (przez Ollama) albo przez **Gemini API**. Wszystkie kwoty i uprawnienia liczy silnik reguł, nie model.
+- **Aspekty graficzne**: AI było wykorzystane przy tworzeniu warstwy graficznej aplikacji (wygląd interfejsu i elementy graficzne).
+
 ## Uruchomienie
 
-Aplikacja to statyczna strona: `index.html` + `css/` + `js/` (bez instalacji i bez backendu).
+### Wymagania
 
-- **Lokalnie:** otwórz `index.html` w przeglądarce (pliki `css/`, `js/` i `assets/` muszą leżeć obok).
-- **Jeden plik:** `npm run build` tworzy `dist/index.html` ze wszystkim w środku (np. do wysłania albo wgrania jako artefakt na claude.ai).
-- **Demo online:** wgraj pliki do repozytorium i włącz GitHub Pages (Settings → Pages → gałąź `main`).
+- **Node.js 22.9 lub nowszy**: [nodejs.org](https://nodejs.org)
+- **Ollama** z modelem Bielik, jeśli asystent AI ma działać lokalnie (patrz niżej)
 
-Funkcje AI (asystent, odczyt PDF, interpretacja trudnych odpowiedzi) działają po wpisaniu klucza OpenRouter w zakładce „Asystent AI” (Ustawienia AI) albo w wersji uruchomionej jako artefakt na claude.ai. Bez modelu działa lokalny parser odpowiedzi i uproszczony asystent.
+Aplikacja nie ma zależności npm, więc `npm install` nie jest potrzebne.
 
-## Przebieg
+### Wariant 1: lokalnie z Bielikiem (Ollama), zalecany
 
-1. **Wybór profilu** (profile testowe z różnymi sytuacjami) i **symulowane logowanie** z wpisanym hasłem.
-2. **Pulpit**: start formularza, dane z ZUS i menu.
-3. **Formularz w formie rozmowy**: przyciski albo odpowiedzi pisane własnymi słowami. Obok widać na żywo wypełniany wniosek, wynik, profil i użyte reguły.
-4. **Pobieranie wniosku**: wypełniony wniosek jako Word (.docx) albo strona do druku (.html, którą można zapisać jako PDF).
-5. **Widoki dodatkowe**: Asystent AI, Sprawa z PDF, Moje wnioski, Kalendarz, Dokumenty, eZUS, Odpis aktu urodzenia, Pomoc.
+1. **Zainstaluj Ollama**
+   - macOS / Windows: pobierz instalator z [ollama.com/download](https://ollama.com/download) i uruchom aplikację Ollama.
+   - Linux: `curl -fsSL https://ollama.com/install.sh | sh`
 
-## Funkcje korzystające z AI
+   Sprawdź instalację: `ollama --version`
 
-| Funkcja | Rola AI | Co robi kod bez AI |
-|---|---|---|
-| Odpowiedzi pisane własnymi słowami | Claude interpretuje odpowiedź, gdy nie poradzi sobie lokalny parser | parser dat („za 6 tygodni”, „30 listopada”, „jestem w 30 tygodniu”), liczb, tak/nie i słów kluczowych |
-| Asystent AI | rozmowa o sytuacji użytkownika; korzysta z narzędzi: odczyt sprawy, symulacja wariantu, zmiana odpowiedzi (tylko na prośbę), lista pytań, parametry, organizacje wsparcia | wszystkie liczby i uprawnienia liczy silnik reguł |
-| Sprawa z PDF | odczyt skanów wniosków i zaświadczeń (strony PDF zamieniane na obrazy w przeglądarce) | weryfikacja ubezpieczenia, podstawa wymiaru i kwoty |
-| Wyjaśnienia pojęć | objaśnienie, gdy nie ma gotowego opisu | ponad 20 gotowych wyjaśnień |
+2. **Pobierz model Bielik** (ok. 6,7 GB, zalecane min. 16 GB RAM):
+   ```bash
+   ollama pull SpeakLeash/bielik-11b-v3.0-instruct:Q4_K_M
+   ```
+   Sprawdź, czy model jest na liście: `ollama list`
 
-Decyzje o uprawnieniach podejmuje kod (silnik reguł R01–R39), a nie model językowy.
+3. **Uruchom aplikację** w katalogu projektu (Ollama musi być włączona):
+   ```bash
+   npm run bielik
+   ```
 
-## Komponenty zewnętrzne
+4. **Otwórz w przeglądarce** [http://localhost:3001](http://localhost:3001)
 
-- **Lato** (Google Fonts), licencja SIL Open Font License 1.1
-- **PDF.js 3.11.174** (Mozilla), licencja Apache 2.0, ładowany z cdnjs tylko przy odczycie PDF
-- **JSZip 3.10.1**, licencja MIT, ładowany z cdnjs tylko przy pobieraniu wniosku jako .docx
-- **Claude** (Anthropic) przez funkcję „ask Claude” artefaktów claude.ai
-- Ikony: własne, rysowane w SVG. Logo: dostarczone przez zespół.
+Inny model Ollama możesz wskazać zmienną `OLLAMA_MODEL`, a inny port zmienną `PORT`, np.:
+```bash
+OLLAMA_MODEL=inny-model PORT=4000 npm run bielik
+```
 
-## Struktura kodu
+Serwer przed startem sprawdza, czy Ollama działa (`http://127.0.0.1:11434`) i czy model jest pobrany. Jeśli nie, wypisze, co zrobić.
 
-Skrypty w `js/` są zwykłymi plikami `<script>` (nie modułami, żeby aplikacja działała po otwarciu z dysku). Ładują się w kolejności numerów i współdzielą zmienne globalne.
+### Wariant 2: lokalnie z Gemini API
+
+1. Skopiuj `.env.example` jako `.env` i wpisz klucz z [aistudio.google.com](https://aistudio.google.com):
+   ```
+   GEMINI_API_KEY=twój_klucz
+   GEMINI_MODEL=gemini-3.1-flash-lite
+   ```
+2. Uruchom: `npm start`
+3. Otwórz [http://localhost:3000](http://localhost:3000)
+
+Klucz zostaje na serwerze lokalnym i nie trafia do przeglądarki ani do repozytorium (`.env` jest w `.gitignore`).
+
+### Wariant 3: bez AI
+
+Skopiuj `js/config.example.js` jako `js/config.js` i otwórz `index.html` w przeglądarce. Działa wszystko poza asystentem AI: rozmowa korzysta z lokalnego parsera, a asystent z uproszczonych odpowiedzi.
+
+## Struktura projektu
 
 | Plik | Zawartość |
 |---|---|
-| `css/style.css` | wszystkie style |
-| `js/01-narzedzia.js` | daty, kwoty, `CFG` (parametry kalkulatora), `RULES` (opisy reguł) |
-| `js/02-profile.js` | `PERS`: profile testowe z symulowanymi danymi ZUS |
-| `js/03-formularz.js` | stan `S`, `ctx()`, pytania `Q` (w tym osobno dla każdego dziecka) |
-| `js/04-zadluzenie.js` | zadłużenie w składkach na dzień powstania prawa, zaświadczenie |
-| `js/05-reguly.js` | `compute()`: silnik reguł i kalkulator |
-| `js/06-ekrany-startowe.js` | menu, nagłówek, wybór profilu, logowanie, pulpit |
+| `index.html`, `css/style.css` | strona i style |
+| `assets/` | logo |
+| `js/01-narzedzia.js` | daty, kwoty, parametry kalkulatora (`CFG`), opisy reguł |
+| `js/02-profile.js` | profile testowe z symulowanymi danymi ZUS |
+| `js/03-formularz.js` | stan aplikacji i pytania rozmowy |
+| `js/04-zadluzenie.js` | zadłużenie w składkach |
+| `js/05-reguly.js` | silnik reguł i kalkulator |
+| `js/06-ekrany-startowe.js` | menu, wybór profilu, logowanie, pulpit |
 | `js/07-parser.js` | rozumienie odpowiedzi pisanych z klawiatury |
-| `js/08-ai.js` | dostawca AI (OpenRouter albo claude.ai), `askLLM()` |
-| `js/09-czat.js` | `HELP` i rozmowa w formularzu |
-| `js/10-panel.js` | panel: wniosek, wynik, profil, reguły |
-| `js/11-linki-wsparcie.js` | organizacje wsparcia, linki do uprawnień |
-| `js/12-ezus.js` | e-ZLA i symulacja eZUS |
-| `js/13-odpis-aktu.js` | wniosek o odpis aktu urodzenia |
+| `js/08-ai.js` | połączenie z modelem AI |
+| `js/09-czat.js`, `js/10-panel.js` | rozmowa i panel (wniosek, wynik, profil, reguły) |
+| `js/11-linki-wsparcie.js` | linki i organizacje wsparcia |
+| `js/12-ezus.js`, `js/13-odpis-aktu.js` | symulacja eZUS, e-ZLA i odpisu aktu urodzenia |
 | `js/14-widoki.js` | kalendarz, dokumenty, moje wnioski, pomoc |
 | `js/15-asystent.js` | asystent AI i jego narzędzia |
-| `js/16-sprawa-pdf.js` | odczyt sprawy z PDF |
+| `js/16-sprawa-pdf.js` | sprawa z PDF |
 | `js/17-wniosek-pobieranie.js` | wniosek do pobrania (.docx, .html) |
-| `js/18-start.js` | `render()`, punkt wejścia dla testów, start aplikacji |
+| `js/18-start.js` | start aplikacji |
+| `server.cjs` | serwer lokalny (localhost) z Gemini API |
+| `server-bielik.cjs` | serwer lokalny (localhost) z Bielikiem przez Ollama |
+| `ZUS_swiadczenia_wymagania_reguly.xlsx` | świadczenia, wymagania konkursu i reguły powiązań |
 
-## Profile testowe
+## Komponenty zewnętrzne
 
-Marta (umowa o pracę, ciąża) · Joanna (bliźnięta, wcześniaki, wariant 81,5%) · Ewelina (umowa na czas określony przedłużona do porodu) · Monika (zlecenie kończy się przed porodem) · Katarzyna (zlecenie bez dobrowolnego chorobowego, odmowa) · Aleksandra (działalność, e-ZLA, zadłużenie, krótki staż) · Tomasz (tata) · Paweł (adopcja, łączenie z pracą) · Natalia (brak ubezpieczenia; ścieżka utraty pracy w ciąży) · profil bez danych z ZUS.
+- **Bielik 11B v3.0 Instruct** (SpeakLeash), uruchamiany lokalnie przez **Ollama**
+- **Gemini API** (Google), opcjonalnie
+- **Lato** (Google Fonts), licencja SIL Open Font License 1.1
+- **PDF.js** (Mozilla), licencja Apache 2.0, ładowany z cdnjs tylko przy odczycie PDF
+- **JSZip**, licencja MIT, ładowany z cdnjs tylko przy pobieraniu wniosku jako .docx
 
-## Testy
+## Ograniczenia
 
-77 testów automatycznych (Playwright): silnik reguł dla wszystkich profili, parser odpowiedzi i interfejs na laptopie i telefonie. Uruchomienie: `npm install`, `npx playwright install chromium`, `npm test`. Szczegóły i scenariusze ręczne dla funkcji AI są w [TESTY.md](TESTY.md).
-
-## Ograniczenia i do potwierdzenia
-
-- Parametry kalkulatora (m.in. wymiar urlopu przy wieloraczkach, urlop uzupełniający, minimalny zasiłek) trzeba zweryfikować z załącznikiem ZUS.
-- Reguły R13 i R15 opierają się na niepełnych informacjach z treści zadania.
+- Parametry kalkulatora trzeba zweryfikować z załącznikiem ZUS.
 - Kwoty są orientacyjne: podstawa = wynagrodzenie brutto minus 13,71% składek.
-- Stan aplikacji (odpowiedzi, wysłane wnioski, kalendarz) nie jest zapisywany po odświeżeniu strony.
-
-## Dane i prywatność
-
-Repozytorium nie zawiera dokumentów ani spraw udostępnionych przez ZUS; zgodnie z treścią zadania nie wolno ich kopiować ani rozpowszechniać. Do testów należy je wgrywać lokalnie w widoku „Sprawa z PDF”.
-
-## Pliki
-
-- `index.html`, `css/`, `js/`: aplikacja
-- `scripts/build.js`: sklejanie w jeden plik `dist/index.html`
-- `assets/logo.png`: logo
-- `ZUS_swiadczenia_wymagania_reguly.xlsx`: świadczenia i dokumenty, wymagania konkursu ze statusem realizacji, reguły powiązań
-- `tests/`, `package.json`, `playwright.config.js`, `TESTY.md`: testy automatyczne
+- Stan aplikacji nie jest zapisywany po odświeżeniu strony.
+- Repozytorium nie zawiera dokumentów ani spraw udostępnionych przez ZUS.

@@ -17,62 +17,54 @@ const AGENT_TOOLS=()=>[
 {name:'get_support',description:'Lista organizacji wspierających rodziców (wcześniaki, choroba dziecka, strata dziecka) i przydatnych stron.',execute:()=>({organizacje:SUPPORT,strony:LINKS})},
 {name:'get_parameters',description:'Parametry kalkulatora (stawki, wymiary urlopów w tygodniach, minimalny zasiłek). Mogą być zmienione przez administratora.',execute:()=>CFG}
 ];
-const AGENT_RULES=()=>`Jesteś asystentem w prototypie aplikacji „Przewodnik przyszłego rodzica” (konkurs HackNation 2026, zadanie ZUS). Pomagasz przyszłym rodzicom zrozumieć zasiłki z ubezpieczenia chorobowego: chorobowy w ciąży, macierzyński (urlop macierzyński, uzupełniający, rodzicielski, ojcowski, na warunkach macierzyńskiego), wnioski, terminy i ryzyka.
-Zasady:
-- Odpowiadaj po polsku, prosto i krótko (zwykle 2–6 zdań lub krótka lista). Zwracaj się do użytkownika na „Ty”.
-- Wszystkie liczby, daty, kwoty i uprawnienia bierz WYŁĄCZNIE z narzędzi get_case lub simulate. Nie licz w głowie i nie wymyślaj przepisów. Kwoty są orientacyjne.
+const AGENT_RULES=()=>`Jesteś ciepłym, konkretnym asystentem w prototypie aplikacji „Przewodnik przyszłego rodzica” (konkurs HackNation 2026, zadanie ZUS). Pomagasz przyszłym i świeżo upieczonym rodzicom zrozumieć zasiłki z ubezpieczenia chorobowego: chorobowy w ciąży, macierzyński (urlop macierzyński, uzupełniający, rodzicielski, ojcowski, na warunkach macierzyńskiego), wnioski, terminy i ryzyka.
+Styl:
+- Rozmawiaj naturalnie i po ludzku, jak życzliwa osoba, która zna temat: możesz się przywitać, nawiązać do tego, co użytkownik napisał wcześniej, dopytać, gdy pytanie jest niejasne, i zaproponować kolejny krok. Pisz po polsku, na „Ty”.
+- Dopasuj długość do pytania: na krótkie odpowiadaj krótko (2–4 zdania), przy wyjaśnieniach możesz użyć krótkiej listy. Bez urzędniczego żargonu; jeśli używasz pojęcia (np. „podstawa wymiaru”), wyjaśnij je jednym zdaniem.
+- Możesz tłumaczyć ogólne zasady (np. czym różni się urlop macierzyński od rodzicielskiego), podawać przykłady i porady praktyczne (jak się przygotować, co załatwić najpierw).
+- Na pytania niezwiązane z tematem (żarty, pytania od czapy) odpowiedz krótko, z lekkim humorem i życzliwie, a potem wróć do spraw rodzicielskich i zaproponuj, w czym możesz pomóc.
+Twarde zasady (zawsze):
+- Liczby, daty, kwoty i uprawnienia użytkownika bierz WYŁĄCZNIE z narzędzi get_case lub simulate. Nie licz w głowie i nie wymyślaj przepisów ani wartości. Kwoty są orientacyjne.
 - Pytania „co jeśli” licz narzędziem simulate i porównaj z obecnym wynikiem.
 - set_answer używaj tylko, gdy użytkownik wyraźnie prosi o zmianę albo podaje nową informację o sobie; potem napisz, co zmieniłeś.
-- Jeśli formularz nie jest kompletny, powiedz, czego brakuje (nastepne_pytanie) i zaproponuj uzupełnienie.
+- Jeśli formularz nie jest kompletny, powiedz, czego brakuje (nastepne_pytanie) i zachęć do uzupełnienia, ale mimo to odpowiedz na pytanie ogólnie, na ile się da.
 - Gdy czegoś nie ma w danych lub przepisy są niejasne, powiedz to wprost i zaproponuj kontakt z ZUS lub płatnikiem.
-- W sytuacjach straty dziecka pisz z empatią i zaproponuj organizacje wsparcia (get_support).
+- W sytuacjach straty dziecka pisz spokojnie i z empatią, bez żartów, i zaproponuj organizacje wsparcia (get_support).
 - To prototyp: logowanie i dane ZUS są symulowane.
 Dzisiaj jest ${TODAY}.`;
 let agentCtl=null;
 function agentStep(t){const el=$('#agstep');if(el)el.textContent=t}
 function offlineAnswer(text){
 const R=compute(),t=lc(text);
-if(!formDone())return 'Najpierw uzupełnij formularz, wtedy policzę Twoją sytuację. Pełny asystent AI zadziała po wpisaniu klucza OpenRouter w ustawieniach obok.';
+if(!formDone())return 'Najpierw uzupełnij formularz, wtedy policzę Twoją sytuację.';
 if(R.blocked)return 'Według formularza zasiłek nie przysługuje: '+R.blocked;
 if(/ile|kwot|zł|pieni|dostan/.test(t))return 'Orientacyjnie:\n'+R.ben.filter(b=>b.m).map(b=>`• ${b.n}: ok. ${Math.round(b.m)} zł/mies. (${String(b.pct).replace('.',',')}%)`).join('\n');
 if(/dokument|załącz|papier/.test(t))return R.att.length?'Przygotuj:\n'+R.att.map(a=>'• '+a.t).join('\n'):'Na tym etapie nie potrzebujesz dodatkowych dokumentów.';
 if(/termin|kiedy|data|do kiedy/.test(t))return R.tl.length?'Najbliższe terminy:\n'+R.tl.filter(e=>diff(TODAY,e.d)>=0).slice(0,5).map(e=>`• ${fmt(e.d)}: ${e.t}`).join('\n'):'Brak terminów.';
 if(/ryzyk|uwaga|zagro|stracić/.test(t))return R.risks.length?'Uważaj na:\n'+R.risks.map(r=>'• '+r.t.replace(/<[^>]+>/g,'')).join('\n'):'Nie widzę ryzyk w Twojej sytuacji.';
 if(/wniosek|gdzie|złoż/.test(t)&&R.w)return `${R.w.name}. ${R.w.where}. ${R.w.when}`;
-return 'Bez podłączonego modelu AI asystent odpowiada tylko na proste pytania: ile dostanę, jakie dokumenty, jakie terminy, jakie ryzyka, gdzie złożyć wniosek. Pełny asystent AI zadziała po wpisaniu klucza OpenRouter w ustawieniach obok.';
+return 'W trybie uproszczonym odpowiadam tylko na proste pytania: ile dostanę, jakie dokumenty, jakie terminy, jakie ryzyka, gdzie złożyć wniosek.';
 }
 function renderAgent(){
 const sug=['Ile dostanę miesięcznie?','Co się zmieni, jeśli drugi rodzic weźmie 12 tygodni rodzicielskiego?','Jakie dokumenty muszę przygotować?','Na co muszę uważać?','Wytłumacz mi wariant 81,5%'];
 $('#app').innerHTML=page('Asystent AI',`<div class="cols ag"><div class="agbox"><div class="msgs" id="agm" aria-live="polite"></div><div class="agstep note" id="agstep"></div><div class="input"><div class="free"><input type="text" id="agin" aria-label="Pytanie do asystenta" placeholder="Zapytaj o swoją sytuację, np. „co jeśli wrócę do pracy na pół etatu?”"><button class="btn pri" id="agsend">Wyślij</button><button class="btn" id="agstop" hidden>Stop</button></div><div class="sug">${sug.map(s=>`<button class="opt" data-sug="${esc(s)}">${esc(s)}</button>`).join('')}</div></div></div>
-<aside class="zcard"><h3>Co widzi asystent</h3><p class="note">Twoje dane z ZUS, odpowiedzi z formularza i wynik silnika reguł. Liczby bierze z kalkulatora, nie wymyśla ich. Zmienia odpowiedzi w formularzu tylko na Twoją prośbę.</p><ul class="facts kv2"><li><span>Formularz</span><strong>${formDone()?'kompletny':'w toku'}</strong></li><li><span>Wniosek</span><strong>${esc((compute().w||{}).name||'—')}</strong></li></ul><p class="note" id="agmode">Model: <strong>${esc(llmName())}</strong>${LLM?'':'. Tryb uproszczony: odpowiadam tylko na proste pytania.'}</p>
-<details class="orset"${OR.key?'':' open'}><summary>Ustawienia AI (OpenRouter)</summary>
-<label for="orkey">Klucz API OpenRouter</label><input type="password" id="orkey" autocomplete="off" placeholder="sk-or-..." value="${esc(OR.key)}">
-<label for="ormodel">Model</label><input type="text" id="ormodel" list="ormodels" value="${esc(OR.model)}"><datalist id="ormodels">${OR_MODELS.map(m=>`<option value="${m}">`).join('')}</datalist>
-<div class="acts"><button class="btn sm pri" id="orsave">Zapisz</button><button class="btn sm" id="ortest">Test połączenia</button>${OR.key?'<button class="btn sm" id="ordel">Usuń klucz</button>':''}</div><p class="note" id="ormsg"></p>
-<p class="note">Klucz zapisuje się tylko w tej przeglądarce i trafia wyłącznie do openrouter.ai. Na pokaz użyj klucza z niskim limitem wydatków (ustawisz go na openrouter.ai). Identyfikatory modeli: openrouter.ai/models.</p></details><button class="btn sm" id="agclr">Wyczyść rozmowę</button></aside></div>`);
-const draw=()=>{const m=$('#agm');m.innerHTML=(S.agent.length?'':`<div class="b bot">Cześć${S.p.manual?'':', '+esc(S.p.dane.imie)}! Znam Twoją sytuację z formularza. O co chcesz zapytać?</div>`)+S.agent.map(t=>`<div class="b ${t.role==='user'?'me':'bot'}">${esc(t.content)}</div>`).join('');m.scrollTop=m.scrollHeight};
+<aside class="zcard"><h3>Co widzi asystent</h3><p class="note">Twoje dane z ZUS, odpowiedzi z formularza i wynik silnika reguł. Liczby bierze z kalkulatora, nie wymyśla ich. Zmienia odpowiedzi w formularzu tylko na Twoją prośbę.</p><ul class="facts kv2"><li><span>Formularz</span><strong>${formDone()?'kompletny':'w toku'}</strong></li><li><span>Wniosek</span><strong>${esc((compute().w||{}).name||'—')}</strong></li></ul><p class="note" id="agmode">${LLM?'<span class="agtag ai">AI aktywne</span> Rozmawiaj swobodnie: rozumiem pytania pisane własnymi słowami.':'Tryb uproszczony: odpowiadam na proste pytania (ile dostanę, dokumenty, terminy, ryzyka, gdzie złożyć wniosek).'}</p><button class="btn sm" id="agclr">Wyczyść rozmowę</button></aside></div>`);
+const draw=()=>{const m=$('#agm');m.innerHTML=(S.agent.length?'':`<div class="b bot">Cześć${S.p.manual?'':', '+esc(S.p.dane.imie)}! Znam Twoją sytuację z formularza. O co chcesz zapytać?</div>`)+S.agent.map(t=>`<div class="b ${t.role==='user'?'me':'bot'}">${esc(t.content)}${t.role!=='user'&&t.src?`<span class="agtag ${t.src}">${t.src==='ai'?'odpowiedź AI':'odpowiedź awaryjna (bez AI)'}</span>`:''}</div>`).join('');m.scrollTop=m.scrollHeight};
 draw();
 const send=async(text)=>{text=(text||'').trim();if(!text||agentCtl)return;S.agent.push({role:'user',content:text});draw();$('#agin').value='';
  const m=$('#agm');m.insertAdjacentHTML('beforeend','<div class="b bot" id="agcur">Myślę…</div>');m.scrollTop=m.scrollHeight;
  let tools=null;try{const lim=LLM&&await LLM.limits();tools=lim&&lim.tools?AGENT_TOOLS():null}catch(e){}
- if(!LLM){const a=offlineAnswer(text);S.agent.push({role:'assistant',content:a});draw();return}
+ if(!LLM){const a=offlineAnswer(text);S.agent.push({role:'assistant',content:a,src:'fallback'});draw();return}
  agentCtl=new AbortController();$('#agstop').hidden=false;$('#agsend').disabled=true;
- const turns=[{role:'user',content:AGENT_RULES()+(tools?'':'\n\nNarzędzia są niedostępne. Dane sprawy (JSON):\n'+JSON.stringify(summarize(compute())).slice(0,12000))},{role:'assistant',content:'Rozumiem. Będę korzystać z danych sprawy.'},...S.agent.slice(-12)];
+ const turns=[{role:'user',content:AGENT_RULES()+(tools?'':'\n\nNarzędzia są niedostępne. Dane sprawy (JSON):\n'+JSON.stringify(summarize(compute())).slice(0,12000))},{role:'assistant',content:'Rozumiem. Będę korzystać z danych sprawy.'},...S.agent.slice(-12).map(t=>({role:t.role,content:t.content}))];
  try{const opts={signal:agentCtl.signal,modelTier:'quick',onText:({text})=>{const el=$('#agcur');if(el)el.textContent=text}};if(tools)opts.tools=tools;else opts.cache=false;
-  const r=await LLM(turns,opts);const parts=r.text.split(/\n\s*\n/);S.agent.push({role:'assistant',content:r.text.trim()})}
- catch(e){if(e&&e.code==='not_granted'){LLM=null;S.agent.push({role:'assistant',content:'Bez zgody na użycie Claude działam w trybie uproszczonym. '+offlineAnswer(text)})}else if(e&&e.code==='cancelled'){if(e.text)S.agent.push({role:'assistant',content:e.text+' […]'})}else S.agent.push({role:'assistant',content:(e&&e.text?e.text+'\n\n':'')+(e&&e.code==='rate_limited'?'Za dużo pytań naraz, spróbuj za chwilę.':e&&e.code==='auth'?'Klucz OpenRouter jest nieprawidłowy. Popraw go w ustawieniach obok.':e&&e.code==='credits'?'Na koncie OpenRouter skończyły się środki.':'Nie udało się uzyskać odpowiedzi'+(e&&e.message?': '+e.message:'. Spróbuj ponownie.'))})}
+  const r=await LLM(turns,opts);S.agent.push({role:'assistant',content:(r.text||'').trim()||offlineAnswer(text),src:(r.text||'').trim()?'ai':'fallback'})}
+ catch(e){if(e&&e.code==='not_granted'){LLM=null;S.agent.push({role:'assistant',content:'Bez zgody na użycie Claude działam w trybie uproszczonym. '+offlineAnswer(text),src:'fallback'})}else if(e&&e.code==='cancelled'){if(e.text)S.agent.push({role:'assistant',content:e.text+' […]'})}else{console.warn('Asystent AI: błąd, używam odpowiedzi awaryjnej.',e);const why=e&&e.code==='rate_limited'?'za dużo pytań naraz':e&&e.code==='auth'?'nieprawidłowy klucz w konfiguracji':e&&e.code==='network'?'brak połączenia':e&&e.code==='credits'?'brak środków na koncie AI':'chwilowa awaria';S.agent.push({role:'assistant',content:`Asystent AI jest chwilowo niedostępny (${why}), więc odpowiadam w trybie awaryjnym:\n\n`+offlineAnswer(text),src:'fallback'})}}
  agentCtl=null;agentStep('');if(S.view==='asystent'){$('#agstop').hidden=true;$('#agsend').disabled=false;draw();if(S.agentChanged){S.agentChanged=false;$('#agstep').innerHTML='Asystent zmienił odpowiedzi w formularzu. <button class="btn sm" data-goto="form">Zobacz formularz</button>';bindGoto()}}};
 $('#agsend').onclick=()=>send($('#agin').value);
 $('#agin').onkeydown=e=>{if(e.key==='Enter')send($('#agin').value)};
 $('#agstop').onclick=()=>{if(agentCtl)agentCtl.abort()};
 $('#agclr').onclick=()=>{S.agent=[];draw()};
-const orRead=()=>{OR.key=$('#orkey').value.trim();OR.model=$('#ormodel').value.trim()||OR_MODELS[0];lsSet('or_key',OR.key);lsSet('or_model',OR.model);pickLLM()};
-$('#orsave').onclick=()=>{orRead();renderAgent()};
-if($('#ordel'))$('#ordel').onclick=()=>{$('#orkey').value='';orRead();renderAgent()};
-$('#ortest').onclick=async()=>{orRead();const m=$('#ormsg');if(!OR.key){m.textContent='Wpisz klucz.';return}m.textContent='Sprawdzam…';
- try{const r=await openRouterLLM()('Odpowiedz jednym słowem: OK',{maxTokens:20});m.textContent='Działa. Model '+OR.model+' odpowiedział: '+(r.text||'').trim().slice(0,40)}
- catch(e){m.textContent='Błąd: '+(e.code==='auth'?'nieprawidłowy klucz.':e.code==='credits'?'brak środków na koncie OpenRouter.':(e.message||e.code))}
- const am=$('#agmode');if(am)am.innerHTML='Model: <strong>'+esc(llmName())+'</strong>'};
 document.querySelectorAll('[data-sug]').forEach(b=>b.onclick=()=>send(b.dataset.sug));
 bindGoto();
 }

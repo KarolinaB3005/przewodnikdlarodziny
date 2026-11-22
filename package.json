@@ -1,18 +1,13 @@
 {
-  "name": "przewodnik-przyszlego-rodzica",
+  "name": "wniosek-na-start",
   "version": "1.0.0",
   "private": true,
   "description": "Prototyp HackNation 2026: Zasiłkowy Przewodnik Przyszłego Rodzica",
-  "scripts": {
-    "build": "node scripts/build.js",
-    "test": "playwright test",
-    "test:reguly": "playwright test tests/reguly.spec.js",
-    "test:parser": "playwright test tests/parser.spec.js",
-    "test:ui": "playwright test tests/ui.spec.js",
-    "raport": "playwright show-report"
+  "engines": {
+    "node": ">=22.9"
   },
-  "devDependencies": {
-    "@playwright/test": "^1.48.0",
-    "jszip": "3.10.1"
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.cjs",
+    "bielik": "node server-bielik.cjs"
   }
 }

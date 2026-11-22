@@ -286,7 +286,6 @@ table{border-radius:0}
 .thumbs img{height:110px;border:1px solid var(--line);border-radius:2px}
 .acts{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
 .okmsg{color:var(--ok);font-weight:700}
-.orset{margin-top:12px}.orset summary{cursor:pointer;font-weight:700}.orset label{display:block;margin:8px 0 4px;font-size:14px}.orset input{width:100%;box-sizing:border-box;font:inherit;padding:7px;border:1px solid var(--line);border-radius:4px;background:var(--paper);color:inherit}
 .ezf label{display:block;margin:8px 0 4px}.ezf select,.ezf textarea,.ezf input[type=number]{width:100%;max-width:520px;font:inherit;padding:8px;border:1px solid var(--line);border-radius:4px;background:var(--paper);color:inherit;box-sizing:border-box}.ezf fieldset{border:1px solid var(--line);border-radius:4px;margin:0 0 12px;padding:8px 12px}.ezf legend{font-weight:700;padding:0 4px}.ezf .chk{display:block;margin:6px 0}.ezbody{margin-top:12px}details summary{cursor:pointer}
 .menu{grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;border:0}
 .mi,.mi:nth-child(n),.mi:nth-child(3n),.mi:nth-child(6n){border:1px solid var(--line);border-radius:4px;cursor:pointer}
@@ -295,3 +294,6 @@ table{border-radius:0}
 .btn:disabled,.opt:disabled{opacity:.5;cursor:not-allowed}
 .overlay .popup{max-width:min(460px,calc(100vw - 32px));border-top:4px solid var(--g);border-radius:4px;font-weight:400}.popup h3{font-size:20px;margin-bottom:10px}.popup p{margin:6px 0}
 h4.menuh{font-size:clamp(24px,2.6vw,32px);font-weight:900;margin:36px 0 16px}
+.top h1.brand{margin:0;line-height:0}.top .brandlogo{display:block;height:clamp(52px,6vw,76px);width:auto;max-width:100%}
+@media(max-width:600px){.top{flex-wrap:nowrap;gap:10px}.top #who{width:auto;flex:none;display:flex;align-items:center;gap:6px}.top .brandlogo{height:40px}.top .chip{font-size:13px;padding:5px 10px}}
+.agtag{display:block;width:max-content;margin-top:6px;font-size:11px;font-weight:700;letter-spacing:.02em;padding:1px 7px;border-radius:999px;background:var(--skyt);color:var(--skyd)}.agtag.fallback{background:var(--ort);color:var(--ord)}#agmode .agtag{display:inline-block;margin:0 4px 0 0}
