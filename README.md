@@ -66,19 +66,7 @@ OLLAMA_MODEL=inny-model PORT=4000 npm run bielik
 
 Serwer przed startem sprawdza, czy Ollama działa (`http://127.0.0.1:11434`) i czy model jest pobrany. Jeśli nie, wypisze, co zrobić.
 
-### Wariant 2: lokalnie z Gemini API
-
-1. Skopiuj `.env.example` jako `.env` i wpisz klucz z [aistudio.google.com](https://aistudio.google.com):
-   ```
-   GEMINI_API_KEY=twój_klucz
-   GEMINI_MODEL=gemini-3.1-flash-lite
-   ```
-2. Uruchom: `npm start`
-3. Otwórz [http://localhost:3000](http://localhost:3000)
-
-Klucz zostaje na serwerze lokalnym i nie trafia do przeglądarki ani do repozytorium (`.env` jest w `.gitignore`).
-
-### Wariant 3: bez AI
+### Wariant 2: bez AI
 
 Skopiuj `js/config.example.js` jako `js/config.js` i otwórz `index.html` w przeglądarce. Działa wszystko poza asystentem AI: rozmowa korzysta z lokalnego parsera, a asystent z uproszczonych odpowiedzi.
 
