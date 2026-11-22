@@ -38,22 +38,26 @@ async function readJSON(req) {
   }
 }
 
-function createApp({ apiKey = '', model = DEFAULT_MODEL, request = fetch } = {}) {
+function createApp({ apiKey = '', model = DEFAULT_MODEL, request = fetch, hosts = [] } = {}) {
   apiKey = apiKey.trim();
+  // poza localhost dopuszczamy tylko jawnie podane adresy (np. adres usługi na Render)
+  const allowed = new Set(hosts.filter(Boolean).map(h => h.toLowerCase()));
+  const hostOk = host => /^(?:localhost|127\.0\.0\.1)(?::\d+)?$/.test(host) || allowed.has(host.toLowerCase());
   if (!/^[a-zA-Z0-9._-]+$/.test(model)) throw Error('Nieprawidłowa wartość GEMINI_MODEL.');
   const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent';
 
   return http.createServer(async (req, res) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     try {
-      if (!/^(?:localhost|127\.0\.0\.1)(?::\d+)?$/.test(req.headers.host || '')) {
+      if (!hostOk(req.headers.host || '')) {
         throw error(403, 'Użyj adresu localhost lub 127.0.0.1.');
       }
 
       const url = new URL(req.url, 'http://localhost').pathname;
       if (url === '/api/gemini') {
         if (req.method !== 'POST') throw error(405, 'Użyj metody POST.');
-        if (req.headers.origin && req.headers.origin !== 'http://' + req.headers.host) {
+        if (req.headers.origin && req.headers.origin !== 'http://' + req.headers.host &&
+            req.headers.origin !== 'https://' + req.headers.host) {
           throw error(403, 'Zapytanie musi pochodzić z tej samej strony.');
         }
         if (!apiKey) throw error(503, 'Ustaw GEMINI_API_KEY w pliku .env i uruchom serwer ponownie.');
@@ -120,8 +124,11 @@ function createApp({ apiKey = '', model = DEFAULT_MODEL, request = fetch } = {})
 
 if (require.main === module) {
   const port = Number(process.env.PORT || 3000);
-  createApp({ apiKey: process.env.GEMINI_API_KEY, model: process.env.GEMINI_MODEL })
-    .listen(port, '127.0.0.1', () => console.log('Przewodnik działa na http://127.0.0.1:' + port));
+  // Render ustawia RENDER i RENDER_EXTERNAL_HOSTNAME; lokalnie serwer słucha tylko na 127.0.0.1
+  const host = process.env.HOST || (process.env.RENDER ? '0.0.0.0' : '127.0.0.1');
+  const hosts = [process.env.RENDER_EXTERNAL_HOSTNAME, ...(process.env.ALLOWED_HOSTS || '').split(',').map(h => h.trim())];
+  createApp({ apiKey: process.env.GEMINI_API_KEY, model: process.env.GEMINI_MODEL, hosts })
+    .listen(port, host, () => console.log('Przewodnik działa na http://' + (host === '0.0.0.0' ? 'localhost' : host) + ':' + port));
 }
 
 module.exports = { createApp };
